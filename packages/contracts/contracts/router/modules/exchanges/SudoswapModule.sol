@@ -14,7 +14,7 @@ import {ISudoswapRouter} from "../../../interfaces/ISudoswapRouter.sol";
 contract SudoswapModule is BaseExchangeModule {
     // --- Fields ---
 
-    ISudoswap public constant SUDOSWAP_ROUTER = 
+    ISudoswapRouter public constant SUDOSWAP_ROUTER = 
         ISudoswapRouter(0x2B2e8cDA09bBA9660dCA5cB6233787738Ad68329);
 
     // --- Constructor ---
@@ -43,7 +43,7 @@ contract SudoswapModule is BaseExchangeModule {
         chargeETHFees(fees, params.amount)
     {
         // Execute fill
-        _buy(swapList, deadline, params.refundTo, params.fillTo, params.revertIfIncomplete, params.amount);
+        _buy(swapList, params.refundTo, params.fillTo, deadline, params.revertIfIncomplete, params.amount);
     }
 
     // --- ERC721 hook ---
@@ -84,7 +84,7 @@ contract SudoswapModule is BaseExchangeModule {
     ) internal {
 
         // Execute fill
-        try SUDOSWAP_ROUTER.swapETHForAnyNFTs{value: value}(swapList, ethRecipient, nftRecipient, deadline) {
+        try SUDOSWAP_ROUTER.swapETHForAnyNFTs{value: value}(swapList, payable(ethRecipient), nftRecipient, deadline) {
 
             //returns (uint256 remainingValue);
             // ^send that to 'ethRecipient'?

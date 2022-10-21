@@ -80,7 +80,7 @@ export interface BaseBuildParams {
   tokenAmount?: number;
   price: string;
   paymentToken: string;
-  fees: string[];
+  fees?: any;
   salt?: BigNumberish;
   startTime: number;
   endTime: number;

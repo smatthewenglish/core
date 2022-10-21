@@ -118,7 +118,7 @@ export class SingleTokenBuilder extends BaseBuilder {
           ? Constants.ORDER_DATA
           : Constants.DATA_TYPE_0X,
         revenueSplits:
-          params.fees?.map((fee) => {
+          params.fees?.map((fee: any) => {
             const [account, value] = fee.split(":");
             return {
               account,

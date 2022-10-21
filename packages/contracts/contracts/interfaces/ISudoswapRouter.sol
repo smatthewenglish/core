@@ -1,50 +1,50 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-struct PairSwapSpecific {
-    address pair;
-    uint256[] nftIds;
-}
-
-struct PairSwapAny {
-    address pair;
-    uint256 numItems;
-}
-
-struct RobustPairSwapAny {
-    PairSwapAny swapInfo;
-    uint256 maxCost;
-}
-
-struct RobustPairSwapSpecific {
-    PairSwapSpecific swapInfo;
-    uint256 maxCost;
-}
-
-struct RobustPairSwapSpecificForToken {
-    PairSwapSpecific swapInfo;
-    uint256 minOutput;
-}
-
-struct NFTsForAnyNFTsTrade {
-    PairSwapSpecific[] nftToTokenTrades;
-    PairSwapAny[] tokenToNFTTrades;
-}
-
-struct NFTsForSpecificNFTsTrade {
-    PairSwapSpecific[] nftToTokenTrades;
-    PairSwapSpecific[] tokenToNFTTrades;
-}
-
-struct RobustPairNFTsFoTokenAndTokenforNFTsTrade {
-    RobustPairSwapSpecific[] tokenToNFTTrades;
-    RobustPairSwapSpecificForToken[] nftToTokenTrades;
-    uint256 inputAmount;
-    address payable tokenRecipient;
-    address nftRecipient;
-}
-
 interface ISudoswapRouter {
+
+    struct PairSwapAny {
+        address pair;
+        uint256 numItems;
+    }
+
+    struct RobustPairSwapAny {
+        PairSwapAny swapInfo;
+        uint256 maxCost;
+    }
+
+    struct NFTsForAnyNFTsTrade {
+        PairSwapSpecific[] nftToTokenTrades;
+        PairSwapAny[] tokenToNFTTrades;
+    }
+
+    struct PairSwapSpecific {
+        address pair;
+        uint256[] nftIds;
+    }
+
+    struct RobustPairSwapSpecific {
+        PairSwapSpecific swapInfo;
+        uint256 maxCost;
+    }
+
+    struct RobustPairSwapSpecificForToken {
+        PairSwapSpecific swapInfo;
+        uint256 minOutput;
+    }
+
+    struct NFTsForSpecificNFTsTrade {
+        PairSwapSpecific[] nftToTokenTrades;
+        PairSwapSpecific[] tokenToNFTTrades;
+    }
+
+    struct RobustPairNFTsFoTokenAndTokenforNFTsTrade {
+        RobustPairSwapSpecific[] tokenToNFTTrades;
+        RobustPairSwapSpecificForToken[] nftToTokenTrades;
+        uint256 inputAmount;
+        address payable tokenRecipient;
+        address nftRecipient;
+    }
 
     /**
         ETH swaps
