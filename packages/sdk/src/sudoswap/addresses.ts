@@ -7,3 +7,4 @@ export const PairFactory: ChainIdToAddress = {
 export const RouterWithRoyalties: ChainIdToAddress = {
   [Network.Ethereum]: "0x844d04f79d2c58dcebf8fff1e389fccb1401aa49",
 };
+

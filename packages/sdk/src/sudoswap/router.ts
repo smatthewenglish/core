@@ -69,4 +69,51 @@ export class Router {
         ]) + generateReferrerBytes(options?.referrer),
     };
   }
+
+  // --- swapETHForSpecificNFTs ---
+
+  public async swapETHForSpecificNFTs(
+    taker: Signer,
+    order: Order,
+    tokenId: string,
+    options?: {
+      recipient?: string;
+      referrer?: string;
+    }
+  ): Promise<ContractTransaction> {
+    const tx = this.swapETHForSpecificNFTsTx(
+      await taker.getAddress(),
+      order,
+      tokenId,
+      options
+    );
+    return taker.sendTransaction(tx);
+  }
+
+  public swapETHForSpecificNFTsTx(
+    taker: string,
+    order: Order,
+    tokenId: string,
+    options?: {
+      recipient?: string;
+      referrer?: string;
+    }
+  ): TxData {
+    return {
+      from: taker,
+      to: "0x844d04f79d2c58dcebf8fff1e389fccb1401aa49",
+      data:
+        this.contract.interface.encodeFunctionData("swapETHForSpecificNFTs", [
+          [
+            {
+              pair: "0x7794C476806731b74ba2049ccd413218248135DA",
+              nftIds: [tokenId],
+            },
+          ],
+          taker, //ethRecipient
+          taker, //nftRecipient
+          Math.floor(Date.now() / 1000) + 10 * 60,
+        ])
+    };
+  }
 }
