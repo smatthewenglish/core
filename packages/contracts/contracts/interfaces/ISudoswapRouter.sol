@@ -44,7 +44,7 @@ struct RobustPairNFTsFoTokenAndTokenforNFTsTrade {
     address nftRecipient;
 }
 
-interface ISudoswap {
+interface ISudoswapRouter {
 
     /**
         ETH swaps
