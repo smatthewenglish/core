@@ -56,7 +56,7 @@ export class Router {
       from: taker,
       to: this.contract.address,
       data:
-        this.contract.interface.encodeFunctionData("swapNFTsForToken", [
+        this.contract.interface.encodeFunctionData("swapETHForSpecificNFTs", [
           [
             {
               pair: order.params.pair,
