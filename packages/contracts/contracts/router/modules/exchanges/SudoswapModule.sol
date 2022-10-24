@@ -7,22 +7,21 @@ import {BaseExchangeModule} from "./BaseExchangeModule.sol";
 import {BaseModule} from "../BaseModule.sol";
 import {ISudoswapRouter} from "../../../interfaces/ISudoswapRouter.sol";
 
-// Notes on the sudoswap module:
-// - supports...
-// - TODO: ...
-
 contract SudoswapModule is BaseExchangeModule {
+    
     // --- Fields ---
 
-    ISudoswapRouter public constant SUDOSWAP_ROUTER = 
-        ISudoswapRouter(0x2B2e8cDA09bBA9660dCA5cB6233787738Ad68329);
+    ISudoswapRouter public immutable SUDOSWAP_ROUTER;
 
     // --- Constructor ---
 
-    constructor(address owner, address router)
+    constructor(address owner, address router, address sudoswap)
         BaseModule(owner)
-        BaseExchangeModule(router)
-    {}
+        BaseExchangeModule(router) {
+
+        // 0x2B2e8cDA09bBA9660dCA5cB6233787738Ad68329 (mainnet)
+        SUDOSWAP_ROUTER = ISudoswapRouter(sudoswap);
+    }
 
     // --- Fallback ---
 
@@ -31,7 +30,7 @@ contract SudoswapModule is BaseExchangeModule {
     // --- Single ETH listing ---
 
     function swapETHForSpecificNFTs(
-        ISudoswapRouter.PairSwapAny[] calldata swapList,
+        ISudoswapRouter.PairSwapSpecific[] calldata swapList,
         uint256 deadline,
         ETHListingParams calldata params,
         Fee[] calldata fees
@@ -75,7 +74,7 @@ contract SudoswapModule is BaseExchangeModule {
     // --- Internal ---
 
     function _buy(
-        ISudoswapRouter.PairSwapAny[] calldata swapList,
+        ISudoswapRouter.PairSwapSpecific[] calldata swapList,
         address ethRecipient,
         address nftRecipient,
         uint256 deadline,
@@ -83,16 +82,19 @@ contract SudoswapModule is BaseExchangeModule {
         uint256 value
     ) internal {
 
+        uint256 remainingValue = 0;
+        
         // Execute fill
-        try SUDOSWAP_ROUTER.swapETHForAnyNFTs{value: value}(swapList, payable(ethRecipient), nftRecipient, deadline) {
-
-            //returns (uint256 remainingValue);
-            // ^send that to 'ethRecipient'?
-
+        try SUDOSWAP_ROUTER.swapETHForSpecificNFTs{value: value}(swapList, payable(ethRecipient), nftRecipient, deadline) returns (uint256 _remainingValue) {
+            remainingValue = _remainingValue;
         } catch {
             if (revertIfIncomplete) {
                 revert UnsuccessfulFill();
             }
+        }
+        if (remainingValue > 0) {
+            (bool success,) = payable(ethRecipient).call{value: remainingValue}("");
+            require(success, "Polygods: value transfer unsuccessful");
         }
     }
 }
