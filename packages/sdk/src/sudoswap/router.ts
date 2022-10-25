@@ -74,7 +74,6 @@ export class Router {
 
   public async swapETHForSpecificNFTs(
     taker: Signer,
-    order: Order,
     tokenId: string,
     options?: {
       recipient?: string;
@@ -83,16 +82,15 @@ export class Router {
   ): Promise<ContractTransaction> {
     const tx = this.swapETHForSpecificNFTsTx(
       await taker.getAddress(),
-      order,
       tokenId,
       options
     );
+    console.log("lol" + this.contract.interface.encodeFunctionData("ownerOf", [tokenId]));
     return taker.sendTransaction(tx);
   }
 
   public swapETHForSpecificNFTsTx(
     taker: string,
-    order: Order,
     tokenId: string,
     options?: {
       recipient?: string;
@@ -101,19 +99,9 @@ export class Router {
   ): TxData {
     return {
       from: taker,
-      to: "0x844d04f79d2c58dcebf8fff1e389fccb1401aa49",
+      to: "0x1a2D222C3FF93f4F1a9d26b27F6669BF8522Aa62",
       data:
-        this.contract.interface.encodeFunctionData("swapETHForSpecificNFTs", [
-          [
-            {
-              pair: "0x7794C476806731b74ba2049ccd413218248135DA",
-              nftIds: [tokenId],
-            },
-          ],
-          taker, //ethRecipient
-          taker, //nftRecipient
-          Math.floor(Date.now() / 1000) + 10 * 60,
-        ])
+        this.contract.interface.encodeFunctionData("ownerOf", [tokenId])
     };
   }
 }

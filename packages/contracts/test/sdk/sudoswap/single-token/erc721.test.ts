@@ -32,14 +32,14 @@ describe("Sudoswap - SingleToken Erc721", () => {
 
     let taker: SignerWithAddress = bob;
     // Create buy order.
-    let order = new Sudoswap.Order(chainId, {
-      pair: pair,
-      price: price.toString(),
-    });
+    // let order = new Sudoswap.Order(chainId, {
+    //   pair: pair,
+    //   price: price.toString(),
+    // });
 
-    console.log(": " + taker.address);
+    // console.log(": " + taker.address);
 
-    await exchange.swapETHForSpecificNFTs(taker, order, tokenId);
+    await exchange.swapETHForSpecificNFTs(taker, tokenId);
 
   });
 });

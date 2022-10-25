@@ -83,7 +83,7 @@ contract SudoswapModule is BaseExchangeModule {
     ) internal {
 
         uint256 remainingValue = 0;
-        
+
         // Execute fill
         try SUDOSWAP_ROUTER.swapETHForSpecificNFTs{value: value}(swapList, payable(ethRecipient), nftRecipient, deadline) returns (uint256 _remainingValue) {
             remainingValue = _remainingValue;
@@ -93,8 +93,8 @@ contract SudoswapModule is BaseExchangeModule {
             }
         }
         if (remainingValue > 0) {
-            (bool success,) = payable(ethRecipient).call{value: remainingValue}("");
-            require(success, "Polygods: value transfer unsuccessful");
+            address remainingValueRecipient = payable(tx.origin); // TODO: parameterize? 
+            _sendETH(remainingValueRecipient, remainingValue);
         }
     }
 }
