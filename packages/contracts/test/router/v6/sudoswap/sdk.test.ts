@@ -15,7 +15,7 @@ import {
 } from "../../../utils";
 import { ListingDetails } from "../../../../../sdk/src/router/v6/types";
 
-describe("[ReservoirV6_0_0] - filling listings via the SDK", () => {
+describe("[ReservoirV6_0_0] - filling sudoswap listings via the SDK", () => {
   const chainId = getChainId();
 
   let deployer: SignerWithAddress;
