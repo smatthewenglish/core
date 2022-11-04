@@ -2,6 +2,7 @@ import { Contract } from "@ethersproject/contracts";
 import { parseEther } from "@ethersproject/units";
 import * as Sdk from "../../../../../sdk/src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
+import { setupSudoswapTestContract, addresTokenPDB, addresPoolPDB  } from "../helpers/sudoswap";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
@@ -91,51 +92,51 @@ describe("[ReservoirV6_0_0] - filling sudoswap listings via the SDK", () => {
       });
     }
 
-    // // Order 2: LooksRare
-    // const seller2 = bob;
-    // const tokenId2 = 1;
-    // const price2 = parseEther("2");
-    // const fee2 = bn(150);
-    // {
-    //   // Mint erc721 to seller
-    //   await erc721.connect(seller2).mint(tokenId2);
+    // Order 2: Sudoswap
+    const seller2 = bob;
+    const tokenId2 = 6113;
+    const price2 = parseEther("0.2");
+    const fee2 = bn(150);
+    {
+      
+      const contractPDB = await setupSudoswapTestContract();
 
-    //   // Approve the transfer manager
-    //   await erc721
-    //     .connect(seller2)
-    //     .setApprovalForAll(
-    //       Sdk.LooksRare.Addresses.TransferManagerErc721[chainId],
-    //       true
-    //     );
+      const owner00 = await contractPDB.ownerOf(tokenId2);
 
-    //   const exchange = new Sdk.LooksRare.Exchange(chainId);
-    //   const builder = new Sdk.LooksRare.Builders.SingleToken(chainId);
+      const pairFactory = new Sdk.Sudoswap.Exchange(chainId); //selling/deposit 
+  
+      const impersonatedSigner = await ethers.getImpersonatedSigner(owner00);
 
-    //   // Build sell order
-    //   const sellOrder = builder.build({
-    //     isOrderAsk: true,
-    //     signer: seller2.address,
-    //     collection: erc721.address,
-    //     tokenId: tokenId2,
-    //     currency: Sdk.Common.Addresses.Weth[chainId],
-    //     price: price2,
-    //     startTime: await getCurrentTimestamp(ethers.provider),
-    //     endTime: (await getCurrentTimestamp(ethers.provider)) + 60,
-    //     nonce: await exchange.getNonce(ethers.provider, seller2.address),
-    //   });
-    //   await sellOrder.sign(seller2);
+      await pairFactory.depositNFTs(impersonatedSigner, addresTokenPDB, [tokenId], addresPoolPDB);
 
-    //   await sellOrder.checkFillability(ethers.provider);
+      const exchange = new Sdk.Sudoswap.Exchange(chainId);
+      const builder = new Sdk.Sudoswap.Builders.SingleToken(chainId);
 
-    //   sellOrders.push({
-    //     kind: "looks-rare",
-    //     contractKind: "erc721",
-    //     contract: erc721.address,
-    //     tokenId: tokenId2.toString(),
-    //     order: sellOrder,
-    //     currency: Sdk.Common.Addresses.Eth[chainId],
-    //   });
-    // }
+      // Build sell order
+      const sellOrder = builder.build({
+        isOrderAsk: true,
+        signer: seller2.address,
+        collection: erc721.address,
+        tokenId: tokenId2,
+        currency: Sdk.Common.Addresses.Weth[chainId],
+        price: price2,
+        startTime: await getCurrentTimestamp(ethers.provider),
+        endTime: (await getCurrentTimestamp(ethers.provider)) + 60,
+        nonce: await exchange.getNonce(ethers.provider, seller2.address),
+      });
+      await sellOrder.sign(seller2);
+
+      await sellOrder.checkFillability(ethers.provider);
+
+      sellOrders.push({
+        kind: "sudoswap",
+        contractKind: "erc721",
+        contract: erc721.address,
+        tokenId: tokenId2.toString(),
+        order: sellOrder,
+        currency: Sdk.Common.Addresses.Eth[chainId],
+      });
+    }
 
     // Order 3: ZeroEx V4
     const seller3 = carol;
