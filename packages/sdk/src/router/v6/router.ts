@@ -311,6 +311,59 @@ export class Router {
     // TODO: When splitting the fees across executions, also take into
     // account the quantity filled (only relevant for ERC1155 listings)
 
+
+
+
+
+    // Handle Sudoswap listings
+    if (sudoswapDetails.length) {
+      const orders = sudoswapDetails.map(
+        (d) => d.order as Sdk.Sudoswap.Order
+      );
+
+      const fees = (options?.globalFees ?? []).map(({ recipient, amount }) => ({
+        recipient,
+        // The fees are averaged over the number of listings to fill
+        amount: bn(amount).mul(foundationDetails.length).div(details.length),
+      }));
+
+      const totalPrice = orders
+        .map((order) => bn(order.params.price))
+        .reduce((a, b) => a.add(b), bn(0));
+      const totalFees = fees
+        .map(({ amount }) => bn(amount))
+        .reduce((a, b) => a.add(b), bn(0));
+
+      executions.push({
+        module: this.contracts.sudoswapModule.address,
+        data:
+          this.contracts.sudoswapModule.interface.encodeFunctionData(
+              "swapETHForSpecificNFTs",
+              [
+                orders.map((order) => order.params),
+                {
+                  fillTo: taker,
+                  refundTo: taker,
+                  revertIfIncomplete: Boolean(!options?.partial),
+                  amount: totalPrice,
+                },
+                fees,
+              ]
+            ),
+        value: totalPrice.add(totalFees),
+      });
+
+      // Mark the listings as successfully handled
+      for (const { originalIndex } of sudoswapDetails) {
+        success[originalIndex] = true;
+      }
+    }
+
+
+
+
+
+
     // Handle Foundation listings
     if (foundationDetails.length) {
       const orders = foundationDetails.map(
@@ -835,6 +888,18 @@ export class Router {
       };
     }
 
+    // TODO: Add Sudoswap router module
+    if (detail.kind === "sudoswap") {
+      const order = detail.order as Sdk.Sudoswap.Order;
+      const exchange = new Sdk.Sudoswap.Router(this.chainId);
+      return {
+        txData: exchange.fillBuyOrderTx(taker, order, detail.tokenId, {
+          source: options?.source,
+        }),
+        direct: true,
+      };
+    }
+
     // X2Y2 bids can only be filled directly (at least their centralized API has this restriction)
     if (detail.kind === "x2y2") {
       const order = detail.order as Sdk.X2Y2.Order;
@@ -851,47 +916,12 @@ export class Router {
       };
     }
 
-
-  //   const module = new Contract(addressModule, ModuleAbi);
-  //   let txnData = module.interface.encodeFunctionData("swapETHForSpecificNFTs", [
-  //     swapList,
-  //     this.getDeadline(),
-  //     ethListingParams,
-  //     fee
-  //   ]);
-  //   return txnData;
-  // }
-
     // Build module-level transaction data
     let moduleLevelTx: {
       module: string;
       data: string;
     };
     switch (detail.kind) {
-      case "sudoswap": {
-  //   swapList: SwapList[],
-  //   ethListingParams: any,
-  //   fee: any[]
-        const order = detail.order as Sdk.Sudoswap.Order; //TODO: correct params...
-        moduleLevelTx = {
-          module: this.contracts.sudoswapModule.address,
-          data: this.contracts.zeroExV4Module.interface.encodeFunctionData(
-            "swapETHForSpecificNFTs",
-            [
-              order.getRaw(),
-              order.params,
-              {
-                fillTo: taker,
-                refundTo: taker,
-                revertIfIncomplete: true,
-              },
-              detail.tokenId,
-            ]
-          ),
-        };
-
-        break;
-      }
       case "looks-rare": {
         const order = detail.order as Sdk.LooksRare.Order;
         const module = this.contracts.looksRareModule.address;
@@ -1103,5 +1133,4 @@ export class Router {
       };
     }
   }
-
 }

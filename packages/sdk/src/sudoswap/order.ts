@@ -22,15 +22,8 @@ const normalize = (order: Types.OrderParams): Types.OrderParams => {
   // - convert strings to numbers where needed
   // - lowercase all strings
 
-  // return {
-  //   pair: lc(order.pair),
-  //   price: s(order.price),
-  // };
-  //     swapList,
-  //     this.getDeadline(),
-  //     ethListingParams,
-  //     fee
   return {
-
+    pair: lc(order.pair),
+    price: s(order.price),
   };
 };
