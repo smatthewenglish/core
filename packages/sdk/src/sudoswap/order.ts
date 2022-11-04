@@ -23,7 +23,11 @@ const normalize = (order: Types.OrderParams): Types.OrderParams => {
   // - lowercase all strings
 
   return {
-    pair: lc(order.pair),
+    // pair: lc(order.pair),
+    // price: s(order.price),
+    maker: lc(order.maker), //impersonatedSigner
+    contract: lc(order.contract),
+    tokenId: s(order.tokenId),
     price: s(order.price),
   };
 };
