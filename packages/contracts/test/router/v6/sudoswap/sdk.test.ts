@@ -1,6 +1,6 @@
 import { Contract } from "@ethersproject/contracts";
 import { parseEther } from "@ethersproject/units";
-import * as Sdk from "@reservoir0x/sdk/src";
+import * as Sdk from "../../../../../sdk/src";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { expect } from "chai";
 import { ethers } from "hardhat";
@@ -13,7 +13,7 @@ import {
   setupNFTs,
   setupRouterWithModules,
 } from "../../../utils";
-import { ListingDetails } from "@reservoir0x/sdk/src/router/v6/types";
+import { ListingDetails } from "../../../../../sdk/src/router/v6/types";
 
 describe("[ReservoirV6_0_0] - filling listings via the SDK", () => {
   const chainId = getChainId();
