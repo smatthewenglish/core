@@ -103,30 +103,25 @@ describe("[ReservoirV6_0_0] - filling sudoswap listings via the SDK", () => {
 
       const owner00 = await contractPDB.ownerOf(tokenId2);
 
-      const pairFactory = new Sdk.Sudoswap.Exchange(chainId); //selling/deposit 
+      const pairFactory = new Sdk.Sudoswap.Exchange(chainId); //selling/deposit
   
       const impersonatedSigner = await ethers.getImpersonatedSigner(owner00);
 
-      await pairFactory.depositNFTs(impersonatedSigner, addresTokenPDB, [tokenId], addresPoolPDB);
+      await pairFactory.depositNFTs(impersonatedSigner, addresTokenPDB, [tokenId2], addresPoolPDB);
 
-      const exchange = new Sdk.Sudoswap.Exchange(chainId);
       const builder = new Sdk.Sudoswap.Builders.SingleToken(chainId);
 
       // Build sell order
       const sellOrder = builder.build({
         isOrderAsk: true,
         signer: seller2.address,
-        collection: erc721.address,
+        collection: addresPoolPDB, //erc721.address,
         tokenId: tokenId2,
-        currency: Sdk.Common.Addresses.Weth[chainId],
-        price: price2,
-        startTime: await getCurrentTimestamp(ethers.provider),
-        endTime: (await getCurrentTimestamp(ethers.provider)) + 60,
-        nonce: await exchange.getNonce(ethers.provider, seller2.address),
+        currency: Sdk.Common.Addresses.Eth[chainId],
+        price: price2
       });
-      await sellOrder.sign(seller2);
-
-      await sellOrder.checkFillability(ethers.provider);
+      //await sellOrder.sign(seller2);
+      //await sellOrder.checkFillability(ethers.provider);
 
       sellOrders.push({
         kind: "sudoswap",
