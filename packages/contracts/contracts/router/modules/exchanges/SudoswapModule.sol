@@ -43,6 +43,50 @@ contract SudoswapModule is BaseExchangeModule {
         _buy(swapList, params.refundTo, params.fillTo, deadline, params.revertIfIncomplete, params.amount);
     }
 
+    // --- [ERC721] Single offer ---
+
+    function acceptERC721Offer(
+        ILooksRare.TakerOrder calldata takerAsk,
+        ILooksRare.MakerOrder calldata makerBid,
+        OfferParams calldata params
+    ) external nonReentrant {
+        IERC721 collection = IERC721(address(makerBid.collection));
+
+        // Approve the transfer manager if needed
+        _approveERC721IfNeeded(collection, ERC721_TRANSFER_MANAGER);
+
+        // Execute the fill
+        _sell(takerAsk, makerBid, params.fillTo, params.revertIfIncomplete);
+
+        // Refund any ERC721 leftover
+        _sendAllERC721(params.refundTo, collection, takerAsk.tokenId);
+    }
+
+    // --- ERC721 hook ---
+
+    // Single token offer acceptance can be done approval-less by using the
+    // standard `safeTransferFrom` method together with specifying data for
+    // further contract calls. An example:
+    // `safeTransferFrom(
+    //      0xWALLET,
+    //      0xMODULE,
+    //      TOKEN_ID,
+    //      0xABI_ENCODED_ROUTER_EXECUTION_CALLDATA_FOR_OFFER_ACCEPTANCE
+    // )`
+
+    function onERC721Received(
+        address, // operator,
+        address, // from
+        uint256, // tokenId,
+        bytes calldata data
+    ) external returns (bytes4) {
+        if (data.length > 0) {
+            _makeCall(router, data, 0);
+        }
+
+        return this.onERC721Received.selector;
+    }
+
     // --- Internal ---
 
     function _buy(
